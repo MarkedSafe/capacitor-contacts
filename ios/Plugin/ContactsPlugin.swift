@@ -20,22 +20,24 @@ public class ContactsPlugin: CAPPlugin, CNContactPickerDelegate {
 
     @objc override public func checkPermissions(_ call: CAPPluginCall) {
         let permissionState: String
-
-        switch CNContactStore.authorizationStatus(for: .contacts) {
+        let authStatus = CNContactStore.authorizationStatus(for: .contacts)
+        switch authStatus {
         case .notDetermined:
             permissionState = "prompt"
         case .restricted, .denied:
             permissionState = "denied"
-        case .authorized, .limited:
-            permissionState = "granted_limited"
+        case .authorized:
+            permissionState = "granted"         // Full access case
+        case .limited:
+            permissionState = "granted_limited"   // Limited access case
         @unknown default:
             permissionState = "prompt"
         }
-
         call.resolve([
             "contacts": permissionState
         ])
     }
+
 
     @objc func getContactsCount(_ call: CAPPluginCall) {
         let store = CNContactStore()
